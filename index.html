@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>מארגן קבוצות</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Rubik', sans-serif;
+      background-image: url('https://i.redd.it/embg3od0d7ue1.gif');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    
+    #root {
+      backdrop-filter: blur(3px);
+      background-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      margin: 0 auto;
+      max-width: 100%;
+      width: 100%;
+      min-height: 100vh;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    @media (min-width: 640px) {
+      #root {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: auto;
+      }
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #38b2ac 0%, #3182ce 100%);
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-btn {
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      border-radius: 0;
+      font-size: 1rem;
+      position: relative;
+    }
+    
+    .nav-btn.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      font-weight: bold;
+      color: white;
+    }
+    
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      width: 60%;
+      height: 3px;
+      background-color: white;
+      border-radius: 3px 3px 0 0;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      height: 12px;
+      border-radius: 6px;
+      background: #e2e8f0;
+      outline: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #3182ce;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.2);
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .team-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #38b2ac 0%, #3182ce 100%);
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      color: #4a5568;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+    }
+    
+    .checkbox {
+      height: 28px;
+      width: 28px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .checkbox.checked {
+      background-color: #3182ce;
+      border-color: #3182ce;
+    }
+    
+    .admin-btn {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #4a5568;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+      background-color: rgba(49, 130, 206, 0.9);
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+    
+    .player-row {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #edf2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s;
+    }
+    
+    .player-row:active {
+      background-color: #f7fafc;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+    }
+    
+    input, button {
+      font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    .fullscreen-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Main App Component
+    const App = () => {
+      const [view, setView] = React.useState('players'); // 'players', 'selection', 'teams', 'login'
+      const [players, setPlayers] = React.useState([]);
+      const [selectedPlayers, setSelectedPlayers] = React.useState([]);
+      const [teams, setTeams] = React.useState({ teams: [], teamsWithGoalkeeper: [] });
+      const [numTeams, setNumTeams] = React.useState(2); // 2-5 teams
+      const [playersCount, setPlayersCount] = React.useState(10); // 10-25 players
+      const [isAdmin, setIsAdmin] = React.useState(false);
+      const [password, setPassword] = React.useState('');
+      const [showLoginModal, setShowLoginModal] = React.useState(false);
+      const [showRatings, setShowRatings] = React.useState(true);
+      const ADMIN_PASSWORD = 'ori1337'; // Admin password
+      
+      // Password checking
+      React.useEffect(() => {
+        // Check if user already logged in as admin
+        const storedAdminStatus = localStorage.getItem('footballAppIsAdmin');
+        if (storedAdminStatus === 'true') {
+          setIsAdmin(true);
+        }
+      }, []);
+      
+      const attemptAdminLogin = () => {
+        if (password === ADMIN_PASSWORD) {
+          setIsAdmin(true);
+          localStorage.setItem('footballAppIsAdmin', 'true');
+          setPassword('');
+          setShowLoginModal(false);
+        } else {
+          alert('סיסמה שגויה!');
+        }
+      };
+      
+      const logoutAdmin = () => {
+        setIsAdmin(false);
+        localStorage.removeItem('footballAppIsAdmin');
+      };
+
+      // Load saved players from localStorage on component mount
+      React.useEffect(() => {
+        try {
+          // First try to load from the football_players.json file
+          fetch('football_players.json')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (Array.isArray(data)) {
+                setPlayers(data);
+                console.log("Players loaded from football_players.json:", data);
+                // Also save to localStorage for future use
+                localStorage.setItem('footballPlayers', JSON.stringify(data));
+              } else {
+                throw new Error('Data is not an array');
+              }
+            })
+            .catch(e => {
+              console.error("Failed to load players from JSON file:", e);
+              // Fallback to localStorage
+              const savedPlayers = localStorage.getItem('footballPlayers');
+              if (savedPlayers) {
+                setPlayers(JSON.parse(savedPlayers));
+              }
+            });
+        } catch (e) {
+          console.error("Failed to load players:", e);
+        }
+      }, []);
+
+      // Save players to localStorage whenever they change
+      React.useEffect(() => {
+        try {
+          localStorage.setItem('footballPlayers', JSON.stringify(players));
+        } catch (e) {
+          console.error("Failed to save players:", e);
+        }
+      }, [players]);
+
+      const addPlayer = (player) => {
+        setPlayers([...players, { ...player, id: Date.now() }]);
+      };
+
+      const updatePlayer = (updatedPlayer) => {
+        setPlayers(players.map(p => p.id === updatedPlayer.id ? updatedPlayer : p));
+      };
+
+      const deletePlayer = (playerId) => {
+        setPlayers(players.filter(p => p.id !== playerId));
+        
+        // Also remove from selected players if needed
+        if (selectedPlayers.includes(playerId)) {
+          setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        }
+      };
+
+      const togglePlayerSelection = (playerId) => {
+        if (selectedPlayers.includes(playerId)) {
+          setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        } else {
+          setSelectedPlayers([...selectedPlayers, playerId]);
+        }
+      };
+
+      const generateTeams = () => {
+        // Helper functions for team balancing
+        const calculateTeamStats = (teamPlayers) => {
+          if (teamPlayers.length === 0) return { overall: 0, attack: 0, defense: 0, movement: 0, responsibility: 0 };
+          
+          const total = teamPlayers.reduce((sum, player) => {
+            // Convert overallLevel to an inverted scale where higher is better
+            const invertedOverall = 6 - parseFloat(player.overallLevel);
+            
+            return {
+              overall: sum.overall + invertedOverall,
+              attack: sum.attack + parseFloat(player.attackLevel),
+              defense: sum.defense + parseFloat(player.defenseLevel),
+              movement: sum.movement + parseFloat(player.movementLevel),
+              responsibility: sum.responsibility + parseFloat(player.responsibilityLevel || 5)
+            };
+          }, { overall: 0, attack: 0, defense: 0, movement: 0, responsibility: 0 });
+          
+          return {
+            overall: total.overall / teamPlayers.length,
+            attack: total.attack / teamPlayers.length,
+            defense: total.defense / teamPlayers.length,
+            movement: total.movement / teamPlayers.length,
+            responsibility: total.responsibility / teamPlayers.length
+          };
+        };
+
+        // אלגוריתם מאוזן לחלוקת קבוצות עם אקראיות
+        const balanceMultipleTeams = (availablePlayers, numTeams) => {
+          // הוספת גורם אקראי לשובר שוויון - יוסיף מעט אקראיות לכל הרצה
+          const getRandomFactor = () => Math.random() * 0.4 - 0.2; // ערך אקראי בין -0.2 ל-0.2
+          
+          // Make a copy and sort players by level with slight randomness
+          availablePlayers = [...availablePlayers].sort((a, b) => {
+            // השוואה ראשונית לפי רמה כללית
+            const overallDiff = a.overallLevel - b.overallLevel;
+            
+            // אם ההפרש קטן, הוסף גורם אקראי
+            if (Math.abs(overallDiff) < 0.5) {
+              return overallDiff + getRandomFactor();
+            }
+            
+            return overallDiff || 
+              (b.attackLevel - a.attackLevel + getRandomFactor()); // הוסף אקראיות גם לקריטריון השני
+          });
+          
+          // מספר שחקנים כולל
+          const totalPlayers = availablePlayers.length;
+          
+          // חישוב גודל בסיסי של כל קבוצה
+          const baseTeamSize = Math.floor(totalPlayers / numTeams);
+          
+          // חישוב כמה קבוצות יקבלו שחקן נוסף (השארית)
+          const remainder = totalPlayers % numTeams;
+          
+          // יצירת המערך של הקבוצות
+          const teams = Array(numTeams).fill().map(() => []);
+          
+          // הקצאת גדלים לכל קבוצה
+          const teamSizes = Array(numTeams).fill(baseTeamSize);
+          
+          // חלוקת השארית - קבוצות עם יותר שחקנים יקבלו את התוספת
+          for (let i = numTeams - 1; i >= numTeams - remainder; i--) {
+            teamSizes[i]++;
+          }
+          
+          let playerIndex = 0;
+          
+          // שלב 1: לוודא שכל קבוצה מקבלת שחקן אחד מהבחירה הראשונה
+          // ערבוב סדר הקבוצות לפני החלוקה הראשונית
+          const teamOrder = Array.from({length: numTeams}, (_, i) => i);
+          for (let i = teamOrder.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [teamOrder[i], teamOrder[j]] = [teamOrder[j], teamOrder[i]];
+          }
+          
+          for (let i = 0; i < numTeams && playerIndex < numTeams; i++) {
+            const team = teamOrder[i];
+            teams[team].push(availablePlayers[playerIndex].id);
+            playerIndex++;
+          }
+          
+          // שלב 2: חלוקת שאר השחקנים בשיטת הזיגזג
+          let direction = 1; // 1 = מלמעלה למטה, -1 = מלמטה למעלה
+          
+          while (playerIndex < totalPlayers) {
+            if (direction === 1) {
+              // מלמעלה למטה
+              for (let team = 0; team < numTeams && playerIndex < totalPlayers; team++) {
+                if (teams[team].length < teamSizes[team]) {
+                  teams[team].push(availablePlayers[playerIndex].id);
+                  playerIndex++;
+                }
+              }
+              direction = -1;
+            } else {
+              // מלמטה למעלה
+              for (let team = numTeams - 1; team >= 0 && playerIndex < totalPlayers; team--) {
+                if (teams[team].length < teamSizes[team]) {
+                  teams[team].push(availablePlayers[playerIndex].id);
+                  playerIndex++;
+                }
+              }
+              direction = 1;
+            }
+          }
+          
+          // זיהוי הקבוצות הקטנות שזכאיות לשוער
+          const teamsWithGoalkeeper = [];
+          for (let i = 0; i < numTeams; i++) {
+            if (teams[i].length === baseTeamSize && remainder > 0) {
+              teamsWithGoalkeeper.push(i);
+            }
+          }
+        
+          // משקלי האלגוריתם
+          const WEIGHTS = {
+            overall: 15, attack: 7, defense: 6, movement: 5, responsibility: 3
+          };
+          
+          // ערבול הסדר שבו נבדקים זוגות קבוצות לאיזון - יוסיף אקראיות
+          const getShuffledPairs = () => {
+            const pairs = [];
+            for (let i = 0; i < numTeams; i++) {
+              for (let j = i + 1; j < numTeams; j++) {
+                pairs.push([i, j]);
+              }
+            }
+            
+            // ערבוב הזוגות
+            for (let i = pairs.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
+            }
+            
+            return pairs;
+          };
+          
+          // Try to balance teams further through swaps
+          for (let iteration = 0; iteration < 100; iteration++) {
+            let improvements = 0;
+            
+            // קבל זוגות מעורבבים
+            const shuffledPairs = getShuffledPairs();
+            
+            // Try swapping between teams
+            for (const [i, j] of shuffledPairs) {
+              const team1Players = teams[i].map(id => availablePlayers.find(p => p.id === id));
+              const team2Players = teams[j].map(id => availablePlayers.find(p => p.id === id));
+              
+              const team1Stats = calculateTeamStats(team1Players);
+              const team2Stats = calculateTeamStats(team2Players);
+              
+              // Current imbalance between teams
+              const currentImbalance = 
+                Math.abs(team1Stats.overall - team2Stats.overall) * WEIGHTS.overall + 
+                Math.abs(team1Stats.attack - team2Stats.attack) * WEIGHTS.attack + 
+                Math.abs(team1Stats.defense - team2Stats.defense) * WEIGHTS.defense + 
+                Math.abs(team1Stats.movement - team2Stats.movement) * WEIGHTS.movement +
+                Math.abs(team1Stats.responsibility - team2Stats.responsibility) * WEIGHTS.responsibility;
+              
+              // ערבול סדר השחקנים לבדיקת חילופים
+              const shufflePlayerIndices = (length) => {
+                const indices = Array.from({length}, (_, i) => i);
+                for (let i = indices.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [indices[i], indices[j]] = [indices[j], indices[i]];
+                }
+                return indices;
+              };
+              
+              const team1Indices = shufflePlayerIndices(team1Players.length);
+              const team2Indices = shufflePlayerIndices(team2Players.length);
+              
+              // Try all possible swaps in randomized order
+              for (const p1 of team1Indices) {
+                for (const p2 of team2Indices) {
+                  // Create copies for testing the swap
+                  const newTeam1Players = [...team1Players];
+                  const newTeam2Players = [...team2Players];
+                  
+                  // Swap players
+                  newTeam1Players[p1] = team2Players[p2];
+                  newTeam2Players[p2] = team1Players[p1];
+                  
+                  // Calculate new stats
+                  const newTeam1Stats = calculateTeamStats(newTeam1Players);
+                  const newTeam2Stats = calculateTeamStats(newTeam2Players);
+                  
+                  // Check if this swap reduces imbalance
+                  const newImbalance = 
+                    Math.abs(newTeam1Stats.overall - newTeam2Stats.overall) * WEIGHTS.overall + 
+                    Math.abs(newTeam1Stats.attack - newTeam2Stats.attack) * WEIGHTS.attack + 
+                    Math.abs(newTeam1Stats.defense - newTeam2Stats.defense) * WEIGHTS.defense + 
+                    Math.abs(newTeam1Stats.movement - newTeam2Stats.movement) * WEIGHTS.movement +
+                    Math.abs(newTeam1Stats.responsibility - newTeam2Stats.responsibility) * WEIGHTS.responsibility;
+                  
+                  if (newImbalance < currentImbalance) {
+                    // This swap improves balance
+                    const temp = teams[i][p1];
+                    teams[i][p1] = teams[j][p2];
+                    teams[j][p2] = temp;
+                    improvements++;
+                    break;
+                  }
+                }
+                if (improvements > 0) break;
+              }
+              if (improvements > 0) break;
+            }
+            
+            if (improvements === 0) break;
+          }
+          
+          return { teams, teamsWithGoalkeeper };
+        };
+        
+        // Filter to get only selected players
+        const selectedPlayerObjects = players.filter(p => selectedPlayers.includes(p.id));
+        
+        // Create balanced teams
+        const result = balanceMultipleTeams(selectedPlayerObjects, numTeams);
+        
+        if (result) {
+          setTeams(result);
+          setView('teams');
+        }
+      };
+
+      // Player Management Component
+      const PlayerManagement = () => {
+        const [isAdding, setIsAdding] = React.useState(false);
+        const [editingPlayer, setEditingPlayer] = React.useState(null);
+        const [formData, setFormData] = React.useState({
+          name: '',
+          overallLevel: 3,
+          attackLevel: 5,
+          defenseLevel: 5,
+          movementLevel: 5,
+          responsibilityLevel: 5  // Added responsibility field with default 5
+        });
+
+        // Functions to export/import player data
+        const exportPlayerData = () => {
+          try {
+            const dataStr = JSON.stringify(players);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'football_players.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+          } catch (e) {
+            console.error("Failed to export data:", e);
+            alert('שגיאה בייצוא הנתונים');
+          }
+        };
+        
+        const importPlayerData = (event) => {
+          try {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+              try {
+                const importedPlayers = JSON.parse(e.target.result);
+                if (Array.isArray(importedPlayers)) {
+                  setPlayers(importedPlayers);
+                  alert('הנתונים יובאו בהצלחה!');
+                } else {
+                  alert('פורמט הקובץ לא תקין');
+                }
+              } catch (err) {
+                alert('שגיאה בקריאת הקובץ');
+                console.error(err);
+              }
+            };
+            
+            reader.readAsText(file);
+          } catch (e) {
+            console.error("Failed to import data:", e);
+            alert('שגיאה בייבוא הנתונים');
+          }
+        };
+
+        const handleChange = (e) => {
+          const { name, value } = e.target;
+          setFormData({
+            ...formData,
+            [name]: name === 'name' ? value : parseFloat(value)
+          });
+        };
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          if (editingPlayer) {
+            updatePlayer({ ...formData, id: editingPlayer.id });
+            setEditingPlayer(null);
+          } else {
+            addPlayer(formData);
+          }
+          resetForm();
+        };
+
+        const startEdit = (player) => {
+          setEditingPlayer(player);
+          setFormData({
+            name: player.name,
+            overallLevel: player.overallLevel || 3,
+            attackLevel: player.attackLevel || 5,
+            defenseLevel: player.defenseLevel || 5,
+            movementLevel: player.movementLevel || 5,
+            responsibilityLevel: player.responsibilityLevel || 5  // Use default if missing
+          });
+          setIsAdding(true);
+        };
+
+        const resetForm = () => {
+          setFormData({
+            name: '',
+            overallLevel: 3,
+            attackLevel: 5,
+            defenseLevel: 5,
+            movementLevel: 5,
+            responsibilityLevel: 5  // Reset to default 5
+          });
+          setIsAdding(false);
+        };
+
+        const renderRatingInput = (label, name, value) => {
+          // Set the max value based on the field name
+          const max = name === 'overallLevel' ? 5 : 10;
+          const displayLabel = name === 'overallLevel' ? 'מספר בחירה' : label;
+          
+          // Get the specific descriptions for min and max values
+          let minLabel = "1";
+          let maxLabel = name === 'overallLevel' ? "5" : "10";
+          
+          if (name === 'overallLevel') {
+            minLabel = "1";
+            maxLabel = "5 (בחירה אחרונה)";
+          } else if (name === 'attackLevel') {
+            minLabel = "1 (לא סקורר גדול)";
+            maxLabel = "10 (סיומת של R9)";
+          } else if (name === 'defenseLevel') {
+            minLabel = "1 (חורים בהגנה)";
+            maxLabel = "10 (רמת מאלדיני)";
+          } else if (name === 'movementLevel') {
+            minLabel = "1 (פסל החירות)";
+            maxLabel = "10 (יש לו 4 ריאות)";
+          } else if (name === 'responsibilityLevel') {
+            minLabel = "1 (אוהב לעשות דריבל כשהוא אחרון)";
+            maxLabel = "10 (משחק באחריות בלי שטויות)";
+          }
+          
+          return (
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-700">{displayLabel}</label>
+              <div className="flex items-center">
+                <span className="mr-2 text-sm font-bold text-gray-600">
+                  {minLabel}
+                </span>
+                <input
+                  type="range"
+                  name={name}
+                  min="1"
+                  max={max}
+                  value={value}
+                  onChange={handleChange}
+                  className="slider w-full"
+                  step="0.1"
+                />
+                <span className="ml-2 text-sm font-bold text-gray-600">
+                  {maxLabel}
+                </span>
+              </div>
+              <div className="text-center mt-1 font-bold text-blue-600">{Number(value).toFixed(1)}</div>
+              {name === 'overallLevel' && (
+                <div className="text-center text-xs text-gray-500">
+                  למדד זה חשיבות עליונה בהרכבת הקבוצות | מספר נמוך = שחקן טוב יותר
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        return (
+          <div className="p-4 relative">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">ניהול שחקנים</h2>
+            
+            {isAdmin && (
+              <>
+                {!isAdding ? (
+                  <div>
+                    <button 
+                      onClick={() => setIsAdding(true)}
+                      className="btn-primary mb-4"
+                    >
+                      + הוסף שחקן חדש
+                    </button>
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        onClick={exportPlayerData}
+                        className="btn-secondary text-sm"
+                      >
+                        ייצוא שחקנים
+                      </button>
+                      <label className="btn-secondary text-sm text-center cursor-pointer">
+                        ייבוא שחקנים
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={importPlayerData}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="card">
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <label className="block mb-2 font-medium text-gray-700">שם</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          placeholder="הכנס שם שחקן"
+                        />
+                      </div>
+                      
+                      {renderRatingInput('מספר בחירה', 'overallLevel', formData.overallLevel)}
+                      {renderRatingInput('רמה התקפית', 'attackLevel', formData.attackLevel)}
+                      {renderRatingInput('רמה הגנתית', 'defenseLevel', formData.defenseLevel)}
+                      {renderRatingInput('רמת תנועה', 'movementLevel', formData.movementLevel)}
+                      {renderRatingInput('משחק באחריות', 'responsibilityLevel', formData.responsibilityLevel)}
+                      
+                      <div className="flex gap-3">
+                        <button 
+                          type="submit" 
+                          className="btn-primary"
+                        >
+                          {editingPlayer ? 'עדכן שחקן' : 'הוסף שחקן'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={resetForm}
+                          className="btn-secondary"
+                        >
+                          ביטול
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+              </>
+            )}
+            
+            <div className="card">
+              <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="font-medium text-gray-700">רשימת שחקנים</h3>
+                {isAdmin && (
+                  <button 
+                    onClick={() => setShowRatings(!showRatings)} 
+                    className="text-blue-500 text-sm"
+                  >
+                    {showRatings ? 'הסתר דירוגים' : 'הצג דירוגים'}
+                  </button>
+                )}
+              </div>
+              
+              {players.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  <p>אין שחקנים. {isAdmin ? 'הוסף שחקנים כדי להתחיל.' : 'המנהל צריך להוסיף שחקנים.'}</p>
+                </div>
+              ) : (
+                <ul>
+                  {players.map(player => (
+                    <li key={player.id} className="player-row">
+                      <div>
+                        <div className="font-bold text-gray-800">{player.name}</div>
+                        {(isAdmin && showRatings) && (
+                          <div className="text-sm text-gray-600 mt-1 flex flex-wrap gap-2">
+                            <span>מס' בחירה: {player.overallLevel.toFixed(1)}</span>
+                            <span>התקפה: {player.attackLevel.toFixed(1)}</span>
+                            <span>הגנה: {player.defenseLevel.toFixed(1)}</span>
+                            <span>תנועה: {player.movementLevel.toFixed(1)}</span>
+                            <span>אחריות: {(player.responsibilityLevel || 5).toFixed(1)}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {isAdmin && (
+                        <div className="flex space-x-3 rtl:space-x-reverse">
+                          <button 
+                            onClick={() => startEdit(player)}
+                            className="text-blue-500 hover:text-blue-700 p-2 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          </button>
+                          <button 
+                            onClick={() => deletePlayer(player.id)}
+                            className="text-red-500 hover:text-red-700 p-2 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
+            {!isAdmin && (
+              <div className="mt-4 flex justify-center">
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-sm text-gray-500 hover:text-blue-500"
+                >
+                  כניסת מנהל
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      };
+      
+      // Player Selection Component
+      const PlayerSelection = () => {
+        // Function to handle team number change
+        const adjustTeamNumber = (increment) => {
+          const newValue = numTeams + increment;
+          if (newValue >= 2 && newValue <= 5) {
+            setNumTeams(newValue);
+          }
+        };
+        
+        return (
+          <div className="p-4">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">בחירת שחקנים</h2>
+            
+            <div className="card mb-6">
+              <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <h3 className="font-medium text-gray-700">מספר קבוצות ושחקנים</h3>
+              </div>
+              <div className="p-4">
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-800 font-medium">מספר שחקנים במשחק</span>
+                    <div className="flex space-x-2 rtl:space-x-reverse">
+                      <button
+                        onClick={() => setPlayersCount(Math.max(10, playersCount - 1))}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={playersCount <= 10}
+                      >
+                        -
+                      </button>
+                      <span className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                        {playersCount}
+                      </span>
+                      <button
+                        onClick={() => setPlayersCount(Math.min(25, playersCount + 1))}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={playersCount >= 25}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-800 font-medium">מספר קבוצות</span>
+                    <div className="flex space-x-2 rtl:space-x-reverse">
+                      <button
+                        onClick={() => adjustTeamNumber(-1)}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={numTeams <= 2}
+                      >
+                        -
+                      </button>
+                      <span className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                        {numTeams}
+                      </span>
+                      <button
+                        onClick={() => adjustTeamNumber(1)}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={numTeams >= 5}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-2 text-center text-sm">
+                  <span className="font-medium text-blue-600">{selectedPlayers.length}</span>
+                  <span className="text-gray-600"> מתוך </span>
+                  <span className="font-medium text-blue-600">{playersCount}</span>
+                  <span className="text-gray-600"> שחקנים נבחרו</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="card">
+              <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <h3 className="font-medium text-gray-700">בחר שחקנים למשחק</h3>
+              </div>
+              {players.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <p>אין שחקנים. המנהל צריך להוסיף שחקנים.</p>
+                </div>
+              ) : (
+                <ul>
+                  {players.map(player => (
+                    <li 
+                      key={player.id} 
+                      className="player-row"
+                      onClick={() => togglePlayerSelection(player.id)}
+                    >
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                        <div 
+                          className={`checkbox ${selectedPlayers.includes(player.id) ? 'checked' : ''}`}
+                        >
+                          {selectedPlayers.includes(player.id) && (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-bold text-gray-800">{player.name}</div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
+            <button 
+              onClick={generateTeams}
+              disabled={selectedPlayers.length !== playersCount}
+              className={`btn-primary mt-6 ${selectedPlayers.length !== playersCount ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              חלק לקבוצות
+            </button>
+          </div>
+        );
+      };
+      
+      // Team Display Component
+      const TeamDisplay = () => {
+        // צבעי גופיות לקבוצות
+        const [teamColors] = React.useState([
+          {bg: 'bg-blue-500', text: 'text-white', name: 'גופיה כחולה'},
+          {bg: 'bg-yellow-500', text: 'text-gray-800', name: 'גופיה צהובה'},
+          {bg: 'bg-red-500', text: 'text-white', name: 'גופיה אדומה'},
+          {bg: 'bg-orange-500', text: 'text-white', name: 'גופיה כתומה'},
+          {bg: 'bg-purple-500', text: 'text-white', name: 'גופיה סגולה'},
+        ]);
+        
+        const copyTeamsToClipboard = () => {
+          try {
+            const teamsText = generateTeamsText();
+            navigator.clipboard.writeText(teamsText);
+            alert('הקבוצות הועתקו ללוח!');
+          } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('שגיאה בהעתקה.');
+          }
+        };
+
+        const generateTeamsText = () => {
+          return teams.teams.map((teamIds, index) => {
+            const teamName = `קבוצה ${index + 1} - ${teamColors[index % teamColors.length].name}`;
+            const teamPlayers = teamIds.map(id => {
+              const player = players.find(p => p.id === id);
+              return player ? player.name : 'שחקן לא ידוע';
+            }).join(', ');
+            
+            // בדוק אם הקבוצה זכאית לשוער
+            const hasGoalkeeper = teams.teamsWithGoalkeeper && teams.teamsWithGoalkeeper.includes(index);
+            const goalieNote = hasGoalkeeper ? ' + שוער מבחוץ' : '';
+            
+            return `${teamName}${goalieNote}: ${teamPlayers}`;
+          }).join('\n\n');
+        };
+
+        const shareToWhatsApp = () => {
+          try {
+            // יוצר הודעה יפה ומעוצבת עם אמוג'ים
+            let formattedTeamsText = "⚽️ *קבוצות* ⚽️\n\n";
+            
+            // סמלים לקבוצות
+            const teamEmojis = ["🔵", "🟡", "🔴", "🟠", "🟣"];
+            
+            teams.teams.forEach((teamIds, index) => {
+              const teamColor = teamColors[index % teamColors.length].name;
+              const teamEmoji = teamEmojis[index % teamEmojis.length];
+              
+              // שם הקבוצה
+              formattedTeamsText += `*${teamEmoji} קבוצה ${index + 1} - ${teamColor}*\n`;
+              
+              // שחקנים בקבוצה
+              const teamPlayers = teamIds.map(id => {
+                const player = players.find(p => p.id === id);
+                return player ? player.name : "שחקן לא ידוע";
+              });
+              
+              // הוספת רשימת שחקנים
+              formattedTeamsText += `👥 *שחקנים:* ${teamPlayers.join(", ")}\n`;
+              
+              // הוספת ציון קבוצה פשוט
+              const stats = getTeamStats(teamIds);
+              if (stats) {
+                const teamScore = ((stats.attack + stats.defense + stats.movement) / 3).toFixed(1);
+                formattedTeamsText += `⭐ *ציון קבוצה:* ${teamScore}\n`;
+              }
+              
+              // בדוק אם הקבוצה זכאית לשוער
+              const hasGoalkeeper = teams.teamsWithGoalkeeper && teams.teamsWithGoalkeeper.includes(index);
+              if (hasGoalkeeper) {
+                formattedTeamsText += "🧤 *זכאי לשוער מהממתינים*\n";
+              }
+              
+              formattedTeamsText += "\n";
+            });
+            
+            // פתיחת וואטסאפ עם ההודעה המעוצבת
+            const encodedText = encodeURIComponent(formattedTeamsText);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+          } catch (err) {
+            console.error('Failed to share:', err);
+            // שיתוף טקסטואלי פשוט במקרה של שגיאה
+            const teamsText = encodeURIComponent(generateTeamsText());
+            window.open(`https://wa.me/?text=${teamsText}`, '_blank');
+          }
+        };
+        
+        // פונקציית עזר לקבלת צבע תואם לקבוצה
+        function getColorForTeam(index) {
+          const colors = [
+            '#3182ce', // כחול
+            '#ecc94b', // צהוב
+            '#e53e3e', // אדום
+            '#ed8936', // כתום
+            '#805ad5'  // סגול
+          ];
+          
+          return colors[index % colors.length];
+        }
+        
+        // Calculate team stats for display
+        const getTeamStats = (teamIds) => {
+          if (!teamIds || teamIds.length === 0) return null;
+          
+          const teamPlayers = teamIds.map(id => players.find(p => p.id === id)).filter(Boolean);
+          
+          if (teamPlayers.length === 0) return null;
+          
+          // Inverted overall level 
+          const overall = teamPlayers.reduce((sum, p) => sum + (6 - parseFloat(p.overallLevel)), 0) / teamPlayers.length;
+          const attack = teamPlayers.reduce((sum, p) => sum + parseFloat(p.attackLevel), 0) / teamPlayers.length;
+          const defense = teamPlayers.reduce((sum, p) => sum + parseFloat(p.defenseLevel), 0) / teamPlayers.length;
+          const movement = teamPlayers.reduce((sum, p) => sum + parseFloat(p.movementLevel), 0) / teamPlayers.length;
+          const responsibility = teamPlayers.reduce((sum, p) => sum + parseFloat(p.responsibilityLevel || 5), 0) / teamPlayers.length;
+          
+          return { overall, attack, defense, movement, responsibility };
+        };
+
+        // Function to render the progress bar for a given value (1-10 scale)
+        const renderStatBar = (value, max = 10) => {
+          // Convert value to percentage (for 1-10 or 1-5 scales)
+          const percentage = ((value - 1) / (max - 1)) * 100;
+          
+          return (
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full" 
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+          );
+        };
+
+        return (
+          <div className="p-4">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">קבוצות</h2>
+            
+            <div className="mb-4 flex space-x-2 rtl:space-x-reverse">
+              <button 
+                onClick={copyTeamsToClipboard}
+                className="btn-secondary flex-1"
+              >
+                העתק קבוצות
+              </button>
+              <button 
+                onClick={shareToWhatsApp}
+                className="btn-primary flex-1"
+              >
+                שתף בוואטסאפ
+              </button>
+            </div>
+            
+            {teams.teams && teams.teams.map((teamIds, index) => {
+              const stats = getTeamStats(teamIds);
+              if (!stats) return null;
+              
+              // בדוק אם הקבוצה זכאית לשוער
+              const hasGoalkeeper = teams.teamsWithGoalkeeper && teams.teamsWithGoalkeeper.includes(index);
+              
+              return (
+                <div 
+                  key={index}
+                  className={`team-card mb-6 ${teamColors[index % teamColors.length].bg}`}
+                >
+                  <div className={`p-3 flex justify-between items-center ${teamColors[index % teamColors.length].text}`}>
+                    <h3 className="font-bold">קבוצה {index + 1} - {teamColors[index % teamColors.length].name}</h3>
+                    <div className="text-sm">
+                      {teamIds.length} שחקנים
+                      {hasGoalkeeper && <span className="mr-1 font-bold"> + שוער</span>}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4">
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">רמה כללית</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.overall.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.overall, 5)}</div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">התקפה</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.attack.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.attack)}</div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">הגנה</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.defense.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.defense)}</div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">תנועה</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.movement.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.movement)}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <h4 className="font-medium text-gray-700 mb-2">שחקנים:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {teamIds.map(id => {
+                        const player = players.find(p => p.id === id);
+                        if (!player) return null;
+                        
+                        return (
+                          <span key={id} className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                            {player.name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {hasGoalkeeper && (
+                    <div className="bg-green-100 p-2 text-center text-sm font-medium text-green-800 rounded-b-lg border-t border-green-200">
+                      הקבוצה זכאית לבחור שוער מהממתינים
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            
+            <button 
+              onClick={() => setView('selection')}
+              className="btn-secondary mt-2"
+            >
+              חזרה לבחירת שחקנים
+            </button>
+          </div>
+        );
+      };
+      
+      // Admin Login Modal - שינוי גישה מלא למודל הכניסה
+      const AdminLoginModal = () => {
+        // אם המודל לא מוצג, לא מרנדרים שום דבר
+        if (!showLoginModal) return null;
+        
+        // שימוש ב-ref כדי להתמקד אוטומטית בשדה הסיסמה
+        const passwordInputRef = React.useRef(null);
+        
+        // מיקוד אוטומטי בשדה הסיסמה כשהמודל נפתח
+        React.useEffect(() => {
+          if (passwordInputRef.current) {
+            passwordInputRef.current.focus();
+          }
+        }, []);
+        
+        // פונקציה לניסיון כניסה
+        const handleLogin = () => {
+          attemptAdminLogin();
+        };
+        
+        // פונקציה לביטול
+        const handleCancel = () => {
+          setPassword('');
+          setShowLoginModal(false);
+        };
+        
+        // פונקציה לניהול לחיצות מקלדת (לאפשר Enter)
+        const handleKeyDown = (e) => {
+          if (e.key === 'Enter') {
+            handleLogin();
+          } else if (e.key === 'Escape') {
+            handleCancel();
+          }
+        };
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h3 className="text-xl font-bold mb-4 text-center">כניסת מנהל</h3>
+              <div className="mb-4">
+                <label className="block mb-2 font-medium text-gray-700">סיסמה</label>
+                <input
+                  ref={passwordInputRef}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="הכנס סיסמה"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleLogin}
+                  className="btn-primary"
+                >
+                  כניסה
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="btn-secondary"
+                >
+                  ביטול
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <>
+          <button
+            onClick={() => setShowLoginModal(true)}
+            className="admin-btn"
+          >
+            מנהל
+          </button>
+          
+          {isAdmin && (
+            <button
+              onClick={logoutAdmin}
+              className="admin-badge"
+            >
+              יציאה ממצב מנהל
+            </button>
+          )}
+          
+          <header className="header">
+            <h1 className="text-xl font-bold text-white mb-4">מארגן קבוצות</h1>
+            <div className="bg-white bg-opacity-10 rounded-lg p-1 flex">
+              <button
+                onClick={() => setView('players')}
+                className={`nav-btn flex-1 ${view === 'players' ? 'active' : ''}`}
+              >
+                שחקנים
+              </button>
+              <button
+                onClick={() => setView('selection')}
+                className={`nav-btn flex-1 ${view === 'selection' ? 'active' : ''}`}
+              >
+                בחירה
+              </button>
+              <button
+                onClick={() => setView('teams')}
+                className={`nav-btn flex-1 ${view === 'teams' ? 'active' : ''}`}
+                disabled={teams.teams.length === 0}
+              >
+                קבוצות
+              </button>
+            </div>
+          </header>
+
+          <div className="content">
+            {view === 'players' && <PlayerManagement />}
+            {view === 'selection' && <PlayerSelection />}
+            {view === 'teams' && <TeamDisplay />}
+          </div>
+          
+          <AdminLoginModal />
+        </>
+      );
+    };
+
+    // Render the App component
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html> 
