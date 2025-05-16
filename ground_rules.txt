@@ -1,0 +1,22 @@
+GROUND RULES
+
+1. NEVER perform actions you weren’t explicitly told to do.  
+   ONLY follow direct instructions.  
+   If something is unclear — ASK. Don’t assume. Don’t guess.
+
+2. Every team MUST have exactly 5 players.  
+   ONLY if it’s not possible — allow 4 for some of the teams if players missing.  
+   Never more. Never less.
+   for example 18 players = 2 teams with 5 players and 2 teams with 4 players!
+
+3. Teams MUST be balanced in terms of overall skill level.  
+   We use a tier-based system for this.  
+   It is NOT acceptable for one team to have mostly low-tier players  
+   while another has mostly top-tier players.
+
+4. Player distribution by tiers MUST be as equal as possible between teams.  
+   Use the `tiers.txt` file to guide the distribution.  
+   Always sort and assign based on tiers from @tiers.txt !  
+   This is how we ensure balanced “overall level” across all teams.
+
+Stick to these rules. No shortcuts. No improvisation.
