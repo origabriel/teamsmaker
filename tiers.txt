@@ -1,0 +1,12 @@
+tiers
+1.0 is the best player
+10.0 is the worst player
+
+tier 1 - 1.0 to 1.7 is the best players - must have 1 in every team
+tier 2 - 2.2 to 2.6 is a little worse then the first tier
+tier 3 - 3.0 to 3.9
+tier 4 - 4.4 to 5.6
+tier 5 - 6.2 to 7.0
+tier 6 - 7.2 to 7.4
+tier 7 - 8.0 to 9.9
+tier 8 - 9.0 to 10.0
