@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>מארגן קבוצות</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Rubik', sans-serif;
+      background-image: url('https://wallpapercave.com/wp/wp8649185.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    
+    #root {
+      backdrop-filter: blur(3px);
+      background-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      margin: 0 auto;
+      max-width: 100%;
+      width: 100%;
+      min-height: 100vh;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    @media (min-width: 640px) {
+      #root {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: auto;
+      }
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #38b2ac 0%, #3182ce 100%);
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-btn {
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      border-radius: 0;
+      font-size: 1rem;
+      position: relative;
+    }
+    
+    .nav-btn.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      font-weight: bold;
+      color: white;
+    }
+    
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      width: 60%;
+      height: 3px;
+      background-color: white;
+      border-radius: 3px 3px 0 0;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      height: 12px;
+      border-radius: 6px;
+      background: #e2e8f0;
+      outline: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #3182ce;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.2);
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .team-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #38b2ac 0%, #3182ce 100%);
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+      padding: 0.75rem 0;
+      color: #4a5568;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+    }
+    
+    .checkbox {
+      height: 28px;
+      width: 28px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .checkbox.checked {
+      background-color: #3182ce;
+      border-color: #3182ce;
+    }
+    
+    .admin-btn {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #4a5568;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+      background-color: rgba(49, 130, 206, 0.9);
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+    
+    .player-row {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #edf2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s;
+    }
+    
+    .player-row:active {
+      background-color: #f7fafc;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+    }
+    
+    input, button {
+      font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    .fullscreen-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Main App Component
+    const App = () => {
+      const [view, setView] = React.useState('players'); // 'players', 'selection', 'teams', 'login'
+      const [players, setPlayers] = React.useState([]);
+      const [selectedPlayers, setSelectedPlayers] = React.useState([]);
+      const [teams, setTeams] = React.useState({ teams: [], teamsWithGoalkeeper: [] });
+      const [numTeams, setNumTeams] = React.useState(2); // 2-5 teams
+      const [playersCount, setPlayersCount] = React.useState(10); // 10-25 players
+      const [isAdmin, setIsAdmin] = React.useState(false);
+      const [password, setPassword] = React.useState('');
+      const [showLoginModal, setShowLoginModal] = React.useState(false);
+      const [showRatings, setShowRatings] = React.useState(true);
+      const ADMIN_PASSWORD = 'ori1337'; // Admin password
+      
+      // Password checking
+      React.useEffect(() => {
+        // Check if user already logged in as admin
+        const storedAdminStatus = localStorage.getItem('footballAppIsAdmin');
+        if (storedAdminStatus === 'true') {
+          setIsAdmin(true);
+        }
+      }, []);
+      
+      const attemptAdminLogin = () => {
+        if (password === ADMIN_PASSWORD) {
+          setIsAdmin(true);
+          localStorage.setItem('footballAppIsAdmin', 'true');
+          setPassword('');
+          setShowLoginModal(false);
+        } else {
+          alert('סיסמה שגויה!');
+        }
+      };
+      
+      const logoutAdmin = () => {
+        setIsAdmin(false);
+        localStorage.removeItem('footballAppIsAdmin');
+      };
+
+      // Load saved players from localStorage on component mount
+      React.useEffect(() => {
+        try {
+          // First try to load from the football_players.json file
+          fetch('football_players.json')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (Array.isArray(data)) {
+                setPlayers(data);
+                console.log("Players loaded from football_players.json:", data);
+                // Also save to localStorage for future use
+                localStorage.setItem('footballPlayers', JSON.stringify(data));
+              } else {
+                throw new Error('Data is not an array');
+              }
+            })
+            .catch(e => {
+              console.error("Failed to load players from JSON file:", e);
+              // Fallback to localStorage
+          const savedPlayers = localStorage.getItem('footballPlayers');
+          if (savedPlayers) {
+            setPlayers(JSON.parse(savedPlayers));
+          }
+            });
+        } catch (e) {
+          console.error("Failed to load players:", e);
+        }
+      }, []);
+
+      // Save players to localStorage whenever they change
+      React.useEffect(() => {
+        try {
+          localStorage.setItem('footballPlayers', JSON.stringify(players));
+        } catch (e) {
+          console.error("Failed to save players:", e);
+        }
+      }, [players]);
+
+      const addPlayer = (player) => {
+        setPlayers([...players, { ...player, id: Date.now() }]);
+      };
+
+      const updatePlayer = (updatedPlayer) => {
+        setPlayers(players.map(p => p.id === updatedPlayer.id ? updatedPlayer : p));
+      };
+
+      const deletePlayer = (playerId) => {
+        setPlayers(players.filter(p => p.id !== playerId));
+        
+        // Also remove from selected players if needed
+        if (selectedPlayers.includes(playerId)) {
+          setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        }
+      };
+
+      const togglePlayerSelection = (playerId) => {
+        if (selectedPlayers.includes(playerId)) {
+          setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        } else {
+          setSelectedPlayers([...selectedPlayers, playerId]);
+        }
+      };
+
+      const generateTeams = () => {
+        // פונקציה משופרת לחלוקת קבוצות המבוססת על מערכת הטירים מהקובץ tiers.txt
+        const balanceTeams = (availablePlayers, requestedNumTeams) => {
+          // הוספת פקטור רנדומליות קטן כדי לקבל תוצאות שונות בכל פעם
+          const randomSeed = Math.random() * 0.2 - 0.1; // רנדום בין -0.1 ל 0.1
+          
+          // הסרת כפילויות אם יש
+          const uniquePlayerIds = [...new Set(availablePlayers.map(p => p.id))];
+          const uniquePlayers = uniquePlayerIds.map(id => 
+            availablePlayers.find(p => p.id === id)
+          );
+          
+          // חישוב מספר הקבוצות האופטימלי
+          const totalPlayers = uniquePlayers.length;
+          
+          // המינימום קבוצות נדרש אם כל קבוצה מכילה 5 שחקנים
+          const minTeams = Math.ceil(totalPlayers / 5);
+          // מקסימום קבוצות אפשרי עם 4 שחקנים בקבוצה
+          const maxTeams = Math.floor(totalPlayers / 4);
+          
+          // הגבלה ל-2-5 קבוצות
+          const limitedMaxTeams = Math.min(5, maxTeams);
+          const limitedMinTeams = Math.max(2, minTeams);
+          
+          // בחירת מספר הקבוצות בתוך הטווח המותר
+          let finalNumTeams = Math.min(Math.max(requestedNumTeams, limitedMinTeams), limitedMaxTeams);
+          
+          console.log(`חלוקה של ${totalPlayers} שחקנים ל-${finalNumTeams} קבוצות (מינימום: ${limitedMinTeams}, מקסימום: ${limitedMaxTeams})`);
+          
+          // חישוב מספר השחקנים בכל קבוצה
+          const playersPerTeam = Math.floor(totalPlayers / finalNumTeams);
+          const remainder = totalPlayers % finalNumTeams;
+          
+          // יצירת הקבוצות
+          const teams = Array(finalNumTeams).fill().map(() => []);
+          
+          // קבוצות קטנות עם 4 שחקנים (יקבלו שוער)
+          const smallTeams = [];
+          
+          // קביעה אילו קבוצות יקבלו 4 שחקנים
+          if (playersPerTeam === 5 && remainder > 0) {
+            // אם הבסיס הוא 5, אז finalNumTeams - remainder קבוצות יקבלו 4 שחקנים
+            for (let i = remainder; i < finalNumTeams; i++) {
+              smallTeams.push(i);
+            }
+          } else if (playersPerTeam === 4 && remainder > 0) {
+            // אם הבסיס הוא 4, השארית הראשונה מקבלת 5, השאר 4
+            for (let i = remainder; i < finalNumTeams; i++) {
+              smallTeams.push(i);
+            }
+          } else if (playersPerTeam === 4 && remainder === 0) {
+            // אם כולם מקבלים 4, כל הקבוצות הן קטנות
+            for (let i = 0; i < finalNumTeams; i++) {
+              smallTeams.push(i);
+            }
+          }
+          
+          console.log(`קבוצות עם 4 שחקנים: ${smallTeams.join(', ')}`);
+          
+          // חלוקת השחקנים לפי טירים לפי הקובץ tiers.txt
+          const playerTiers = [
+            [], // Tier 1: 1.0-1.7 (הכי טובים - חובה אחד בכל קבוצה אם אפשר)
+            [], // Tier 2: 2.2-2.6 (טיפה פחות טובים מטיר 1)
+            [], // Tier 3: 3.0-3.9
+            [], // Tier 4: 4.4-5.6
+            [], // Tier 5: 6.2-7.0
+            [], // Tier 6: 7.2-7.4
+            [], // Tier 7: 8.0-9.0
+            []  // Tier 8: 9.0-10.0 (החלשים ביותר, אסור שיהיו 2 מהם בקבוצה אחת או אחד מ-7 ואחד מ-8)
+          ];
+          
+          // מיון השחקנים לטירים לפי ההגדרות בקובץ tiers.txt
+          uniquePlayers.forEach(player => {
+            const level = parseFloat(player.overallLevel);
+            
+            // מיון מדויק לפי הטירים שהוגדרו בקובץ
+            if (level >= 1.0 && level <= 1.7) {
+              playerTiers[0].push(player);
+            } 
+            else if (level >= 2.2 && level <= 2.6) {
+              playerTiers[1].push(player);
+            }
+            else if (level >= 3.0 && level <= 3.9) {
+              playerTiers[2].push(player);
+            }
+            else if (level >= 4.4 && level <= 5.6) {
+              playerTiers[3].push(player);
+            }
+            else if (level >= 6.2 && level <= 7.0) {
+              playerTiers[4].push(player);
+            }
+            else if (level >= 7.2 && level <= 7.4) {
+              playerTiers[5].push(player);
+            }
+            else if (level >= 8.0 && level <= 9.0) {
+              playerTiers[6].push(player);
+            }
+            else if (level >= 9.0 && level <= 10.0) {
+              playerTiers[7].push(player);
+            }
+            else {
+              // שחקנים שלא נכנסים לאף טיר מוגדר - נשים אותם בטיר הקרוב ביותר
+              if (level < 2.2) playerTiers[0].push(player);
+              else if (level < 3.0) playerTiers[1].push(player);
+              else if (level < 4.4) playerTiers[2].push(player);
+              else if (level < 6.2) playerTiers[3].push(player);
+              else if (level < 7.2) playerTiers[4].push(player);
+              else if (level < 8.0) playerTiers[5].push(player);
+              else if (level < 9.0) playerTiers[6].push(player);
+              else playerTiers[7].push(player);
+            }
+          });
+          
+          // מיון השחקנים בכל טיר לפי רמה (1.0 הכי טוב, 10.0 הכי חלש)
+          // חשוב: גם בתוך הטיר עצמו יש משמעות לרמה המדויקת - 2.2 טוב יותר מ-2.6
+          for (let i = 0; i < playerTiers.length; i++) {
+            playerTiers[i] = playerTiers[i].sort((a, b) => a.overallLevel - b.overallLevel);
+          }
+          
+          // לוג של הטירים לדיבוג
+          playerTiers.forEach((tier, index) => {
+            console.log(`טיר ${index + 1} (${tier.length} שחקנים): ${tier.map(p => p.name + ' (' + p.overallLevel + ')').join(', ')}`);
+          });
+          
+          // אתחול מבנה נתונים לעקוב אחרי הקבוצות ורמתן
+          let teamData = Array(finalNumTeams).fill().map((_, teamIndex) => ({
+            playerIds: [],  // מערך של מזהי שחקנים בקבוצה זו
+            tierCounts: Array(8).fill(0),  // כמה שחקנים מכל טיר יש בקבוצה
+            overallStrength: 0,  // חוזק כולל של הקבוצה (מספר נמוך = קבוצה חזקה)
+            size: smallTeams.includes(teamIndex) ? 4 : 5  // גודל הקבוצה
+          }));
+          
+          // שלב 1: חלוקת שחקני טיר 1 לכל הקבוצות (אם אפשר)
+          const tier1Count = playerTiers[0].length;
+          
+          // העתקת הטיר ושיבוץ רנדומלי קל של 10% מהרמה
+          const tier1Players = [...playerTiers[0]]
+            .map(player => ({
+              ...player,
+              adjustedLevel: player.overallLevel + (Math.random() * 0.2 - 0.1) // רנדומיות קלה לשחקני טיר 1
+            }))
+            .sort((a, b) => a.adjustedLevel - b.adjustedLevel); // מיון לפי הרמה המותאמת
+          
+          if (tier1Count > 0) {
+            // חלוקת שחקני טיר 1 לכל הקבוצות ככל שאפשר
+            for (let i = 0; i < Math.min(finalNumTeams, tier1Count); i++) {
+              const player = tier1Players[i];
+              teamData[i].playerIds.push(player.id);
+              teamData[i].tierCounts[0]++;
+              teamData[i].overallStrength += player.overallLevel; // חוזק = סכום רמות (נמוך = חזק)
+            }
+            
+            // הסר את השחקנים שכבר שובצו
+            playerTiers[0] = playerTiers[0].filter(player => 
+              !teamData.some(team => team.playerIds.includes(player.id))
+            );
+          }
+          
+          // שלב 2: חלוקת שחקני טיר 2, עם התחשבות בכך שקבוצות ללא שחקני טיר 1 יקבלו עדיפות
+          if (playerTiers[1].length > 0) {
+            // תעדוף קבוצות ללא שחקני טיר 1
+            const teamsWithoutTier1 = teamData
+              .map((team, index) => ({ index, tier1Count: team.tierCounts[0] }))
+              .filter(team => team.tier1Count === 0)
+              .map(team => team.index);
+            
+            // שחקני טיר 2 עם רנדומיות קלה
+            const tier2Players = [...playerTiers[1]]
+              .map(player => ({
+                ...player,
+                adjustedLevel: player.overallLevel + (Math.random() * 0.2 - 0.1) // רנדומיות קלה לשחקני טיר 2
+              }))
+              .sort((a, b) => a.adjustedLevel - b.adjustedLevel);
+            
+            // קבוצות ללא שחקני טיר 1 מקבלות שחקני טיר 2 חזקים
+            for (let i = 0; i < teamsWithoutTier1.length && tier2Players.length > 0; i++) {
+              const teamIndex = teamsWithoutTier1[i];
+              const player = tier2Players.shift();
+              
+              teamData[teamIndex].playerIds.push(player.id);
+              teamData[teamIndex].tierCounts[1]++;
+              teamData[teamIndex].overallStrength += player.overallLevel;
+              
+              // אם יש מספיק שחקני טיר 2, תן שני שחקנים לקבוצות ללא טיר 1
+              if (tier2Players.length > 0 && teamData[teamIndex].playerIds.length < teamData[teamIndex].size) {
+                const secondPlayer = tier2Players.shift();
+                teamData[teamIndex].playerIds.push(secondPlayer.id);
+                teamData[teamIndex].tierCounts[1]++;
+                teamData[teamIndex].overallStrength += secondPlayer.overallLevel;
+              }
+            }
+            
+            // הסר את השחקנים שכבר שובצו מטיר 2
+            playerTiers[1] = playerTiers[1].filter(player => 
+              !teamData.some(team => team.playerIds.includes(player.id))
+            );
+          }
+          
+          // שלב 3: חלוקת שאר השחקנים תוך שמירה על איזון ברמת הקבוצות
+          // נאחד את כל השחקנים הנותרים ונמיין לפי רמה
+          const remainingPlayers = [];
+          for (let tier = 1; tier < playerTiers.length; tier++) {
+            remainingPlayers.push(...playerTiers[tier]);
+          }
+          
+          remainingPlayers.sort((a, b) => a.overallLevel - b.overallLevel);
+          
+          // בקרה על איזון - מוודא שלא יהיו שני שחקנים מטיר 8 או אחד מטיר 7 ואחד מטיר 8 באותה קבוצה
+          function isValidAssignment(team, player) {
+            const playerTier = getPlayerTier(player);
+            
+            // בדיקה לכלל: לא יהיו 2 שחקנים מטיר 8 באותה קבוצה
+            if (playerTier === 7 && team.tierCounts[7] >= 1) {
+              return false;
+            }
+            
+            // בדיקה לכלל: לא יהיה שחקן מטיר 7 ושחקן מטיר 8 באותה קבוצה
+            if ((playerTier === 7 && team.tierCounts[6] >= 1) || 
+                (playerTier === 6 && team.tierCounts[7] >= 1)) {
+              return false;
+            }
+            
+            return true;
+          }
+          
+          // פונקציית עזר למציאת הטיר של שחקן
+          function getPlayerTier(player) {
+            const level = parseFloat(player.overallLevel);
+            
+            if (level >= 1.0 && level <= 1.7) return 0;
+            else if (level >= 2.2 && level <= 2.6) return 1;
+            else if (level >= 3.0 && level <= 3.9) return 2;
+            else if (level >= 4.4 && level <= 5.6) return 3;
+            else if (level >= 6.2 && level <= 7.0) return 4;
+            else if (level >= 7.2 && level <= 7.4) return 5;
+            else if (level >= 8.0 && level <= 9.0) return 6;
+            else if (level >= 9.0 && level <= 10.0) return 7;
+            
+            // אם לא התאים לאף טיר, החזר את הטיר הקרוב ביותר
+            if (level < 2.2) return 0;
+            else if (level < 3.0) return 1;
+            else if (level < 4.4) return 2;
+            else if (level < 6.2) return 3;
+            else if (level < 7.2) return 4;
+            else if (level < 8.0) return 5;
+            else if (level < 9.0) return 6;
+            else return 7;
+          }
+          
+          // מצא את הקבוצה עם הרמה הכי חלשה (הערך הגבוה ביותר) ועם מקום פנוי
+          function findWeakestTeam(playerToAssign) {
+            let weakestTeamIndex = -1;
+            let highestStrength = -Infinity;
+            
+            for (let i = 0; i < teamData.length; i++) {
+              const team = teamData[i];
+              
+              // אם הקבוצה מלאה, דלג
+              if (team.playerIds.length >= team.size) {
+                continue;
+              }
+              
+              // אם השיבוץ לא חוקי (טירים 7-8), דלג
+              if (!isValidAssignment(team, playerToAssign)) {
+                continue;
+              }
+              
+              // בחר את הקבוצה החלשה ביותר (ערך גבוה = חלשה יותר)
+              // נוסיף מעט רנדומיות כדי לקבל תוצאות שונות בכל הרצה
+              const adjustedStrength = team.overallStrength + (Math.random() * randomSeed);
+              
+              if (weakestTeamIndex === -1 || adjustedStrength > highestStrength) {
+                weakestTeamIndex = i;
+                highestStrength = adjustedStrength;
+              }
+            }
+            
+            return weakestTeamIndex;
+          }
+          
+          // חלוקת שאר השחקנים
+          while (remainingPlayers.length > 0) {
+            const player = remainingPlayers.shift();
+            const teamIndex = findWeakestTeam(player);
+            
+            if (teamIndex === -1) {
+              console.warn(`לא נמצאה קבוצה חוקית לשחקן ${player.name}`);
+              continue;
+            }
+            
+            const playerTier = getPlayerTier(player);
+            teamData[teamIndex].playerIds.push(player.id);
+            teamData[teamIndex].tierCounts[playerTier]++;
+            teamData[teamIndex].overallStrength += player.overallLevel;
+          }
+          
+          // מעבר מבנה הנתונים למבנה הנדרש ליציאה
+          for (let i = 0; i < teamData.length; i++) {
+            teams[i] = teamData[i].playerIds;
+          }
+          
+          // חישוב רמת הקבוצות לצורך הדפסה
+          const teamStrengthDisplay = [];
+          for (let i = 0; i < teamData.length; i++) {
+            const teamPlayers = teamData[i].playerIds.map(id => uniquePlayers.find(p => p.id === id));
+            const avgLevel = teamPlayers.reduce((sum, p) => sum + parseFloat(p.overallLevel), 0) / teamPlayers.length;
+            teamStrengthDisplay.push({
+              teamIndex: i,
+              averageLevel: avgLevel.toFixed(2),
+              playerCount: teamPlayers.length,
+              tiers: teamData[i].tierCounts,
+              players: teamPlayers.map(p => `${p.name} (${p.overallLevel})`)
+            });
+          }
+          
+          console.log("רמת הקבוצות:", teamStrengthDisplay);
+          
+          // בדיקה סופית - וידוא שכל הקבוצות מכילות את מספר השחקנים הנכון
+          for (let i = 0; i < finalNumTeams; i++) {
+            const expectedSize = smallTeams.includes(i) ? 4 : 5;
+            
+            if (teams[i].length !== expectedSize) {
+              console.warn(`שגיאה: קבוצה ${i+1} מכילה ${teams[i].length} שחקנים במקום ${expectedSize}`);
+            }
+          }
+          
+          return { teams, teamsWithGoalkeeper: smallTeams };
+        };
+        
+        // Filter to get only selected players
+        const selectedPlayerObjects = players.filter(p => selectedPlayers.includes(p.id));
+        
+        try {
+          // חלוקה לקבוצות
+          const result = balanceTeams(selectedPlayerObjects, numTeams);
+        
+          if (result) {
+            setTeams(result);
+            setView('teams');
+          }
+        } catch (error) {
+          console.error("שגיאה בחלוקת קבוצות:", error);
+          alert(`שגיאה: ${error.message}`);
+        }
+      };
+
+      // Player Management Component
+      const PlayerManagement = () => {
+        const [isAdding, setIsAdding] = React.useState(false);
+        const [editingPlayer, setEditingPlayer] = React.useState(null);
+        const [formData, setFormData] = React.useState({
+          name: '',
+          overallLevel: 5,
+          attackLevel: 5,
+          defenseLevel: 5,
+          movementLevel: 5,
+          responsibilityLevel: 5
+        });
+
+        // Functions to export/import player data
+        const exportPlayerData = () => {
+          try {
+            const dataStr = JSON.stringify(players);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'football_players.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+          } catch (e) {
+            console.error("Failed to export data:", e);
+            alert('שגיאה בייצוא הנתונים');
+          }
+        };
+        
+        const importPlayerData = (event) => {
+          try {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+              try {
+                const importedPlayers = JSON.parse(e.target.result);
+                if (Array.isArray(importedPlayers)) {
+                  setPlayers(importedPlayers);
+                  alert('הנתונים יובאו בהצלחה!');
+                } else {
+                  alert('פורמט הקובץ לא תקין');
+                }
+              } catch (err) {
+                alert('שגיאה בקריאת הקובץ');
+                console.error(err);
+              }
+            };
+            
+            reader.readAsText(file);
+          } catch (e) {
+            console.error("Failed to import data:", e);
+            alert('שגיאה בייבוא הנתונים');
+          }
+        };
+
+        const handleChange = (e) => {
+          const { name, value } = e.target;
+          setFormData({
+            ...formData,
+            [name]: name === 'name' ? value : parseFloat(value)
+          });
+        };
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          if (editingPlayer) {
+            updatePlayer({ ...formData, id: editingPlayer.id });
+            setEditingPlayer(null);
+          } else {
+            addPlayer(formData);
+          }
+          resetForm();
+        };
+
+        const startEdit = (player) => {
+          setEditingPlayer(player);
+          setFormData({
+            name: player.name,
+            overallLevel: player.overallLevel || 5,
+            attackLevel: player.attackLevel || 5,
+            defenseLevel: player.defenseLevel || 5,
+            movementLevel: player.movementLevel || 5,
+            responsibilityLevel: player.responsibilityLevel || 5  // Use default if missing
+          });
+          setIsAdding(true);
+        };
+
+        const resetForm = () => {
+          setFormData({
+            name: '',
+            overallLevel: 5,
+            attackLevel: 5,
+            defenseLevel: 5,
+            movementLevel: 5,
+            responsibilityLevel: 5
+          });
+          setIsAdding(false);
+        };
+
+        const renderRatingInput = (label, name, value) => {
+          // Set the max value based on the field name
+          const max = 10; // All ratings now use a scale of 1-10
+          const displayLabel = name === 'overallLevel' ? 'מספר בחירה' : label;
+          
+          // Get the specific descriptions for min and max values
+          let minLabel = "1";
+          let maxLabel = "10";
+          
+          if (name === 'overallLevel') {
+            minLabel = "1 (שחקן מצוין)";
+            maxLabel = "10 (שחקן חלש)";
+          } else if (name === 'attackLevel') {
+            minLabel = "1 (לא סקורר גדול)";
+            maxLabel = "10 (סיומת של R9)";
+          } else if (name === 'defenseLevel') {
+            minLabel = "1 (חורים בהגנה)";
+            maxLabel = "10 (רמת מאלדיני)";
+          } else if (name === 'movementLevel') {
+            minLabel = "1 (פסל החירות)";
+            maxLabel = "10 (יש לו 4 ריאות)";
+          } else if (name === 'responsibilityLevel') {
+            minLabel = "1 (אוהב לעשות דריבל כשהוא אחרון)";
+            maxLabel = "10 (משחק באחריות בלי שטויות)";
+          }
+          
+          return (
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-700">{displayLabel}</label>
+              <div className="flex items-center">
+                <span className="mr-2 text-sm font-bold text-gray-600">
+                  {minLabel}
+                </span>
+                <input
+                  type="range"
+                  name={name}
+                  min="1"
+                  max={max}
+                  value={value}
+                  onChange={handleChange}
+                  className="slider w-full"
+                  step="0.1"
+                />
+                <span className="ml-2 text-sm font-bold text-gray-600">
+                  {maxLabel}
+                </span>
+              </div>
+              <div className="text-center mt-1 font-bold text-blue-600">{Number(value).toFixed(1)}</div>
+              {name === 'overallLevel' && (
+                <div className="text-center text-xs text-gray-500">
+                  למדד זה חשיבות עליונה בהרכבת הקבוצות | מספר גבוה = שחקן חלש יותר
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        return (
+          <div className="p-4 relative">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">ניהול שחקנים</h2>
+            
+            {isAdmin && (
+              <>
+                {!isAdding ? (
+                  <div>
+                  <button 
+                    onClick={() => setIsAdding(true)}
+                    className="btn-primary mb-4"
+                  >
+                    + הוסף שחקן חדש
+                  </button>
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        onClick={exportPlayerData}
+                        className="btn-secondary text-sm"
+                      >
+                        ייצוא שחקנים
+                      </button>
+                      <label className="btn-secondary text-sm text-center cursor-pointer">
+                        ייבוא שחקנים
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={importPlayerData}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="card">
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <label className="block mb-2 font-medium text-gray-700">שם</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          placeholder="הכנס שם שחקן"
+                        />
+                      </div>
+                      
+                      {renderRatingInput('מספר בחירה', 'overallLevel', formData.overallLevel)}
+                      {renderRatingInput('רמה התקפית', 'attackLevel', formData.attackLevel)}
+                      {renderRatingInput('רמה הגנתית', 'defenseLevel', formData.defenseLevel)}
+                      {renderRatingInput('רמת תנועה', 'movementLevel', formData.movementLevel)}
+                      {renderRatingInput('משחק באחריות', 'responsibilityLevel', formData.responsibilityLevel)}
+                      
+                      <div className="flex gap-3">
+                        <button 
+                          type="submit" 
+                          className="btn-primary"
+                        >
+                          {editingPlayer ? 'עדכן שחקן' : 'הוסף שחקן'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={resetForm}
+                          className="btn-secondary"
+                        >
+                          ביטול
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+              </>
+            )}
+            
+            <div className="card">
+              <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="font-medium text-gray-700">רשימת שחקנים</h3>
+                {isAdmin && (
+                  <button 
+                    onClick={() => setShowRatings(!showRatings)} 
+                    className="text-blue-500 text-sm"
+                  >
+                    {showRatings ? 'הסתר דירוגים' : 'הצג דירוגים'}
+                  </button>
+                )}
+              </div>
+              
+              {players.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  <p>אין שחקנים. {isAdmin ? 'הוסף שחקנים כדי להתחיל.' : 'המנהל צריך להוסיף שחקנים.'}</p>
+                </div>
+              ) : (
+                <ul>
+                  {players.map(player => (
+                    <li key={player.id} className="player-row">
+                      <div>
+                        <div className="font-bold text-gray-800">{player.name}</div>
+                        {(isAdmin && showRatings) && (
+                          <div className="text-sm text-gray-600 mt-1 flex flex-wrap gap-2">
+                            <span>מס' בחירה: {player.overallLevel.toFixed(1)}</span>
+                            <span>התקפה: {player.attackLevel.toFixed(1)}</span>
+                            <span>הגנה: {player.defenseLevel.toFixed(1)}</span>
+                            <span>תנועה: {player.movementLevel.toFixed(1)}</span>
+                            <span>אחריות: {(player.responsibilityLevel || 5).toFixed(1)}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {isAdmin && (
+                        <div className="flex space-x-3 rtl:space-x-reverse">
+                          <button 
+                            onClick={() => startEdit(player)}
+                            className="text-blue-500 hover:text-blue-700 p-2 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          </button>
+                          <button 
+                            onClick={() => deletePlayer(player.id)}
+                            className="text-red-500 hover:text-red-700 p-2 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
+            {!isAdmin && (
+              <div className="mt-4 flex justify-center">
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-sm text-gray-500 hover:text-blue-500"
+                >
+                  כניסת מנהל
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      };
+      
+      // Player Selection Component
+      const PlayerSelection = () => {
+        // Function to handle team number change
+        const adjustTeamNumber = (increment) => {
+          const newValue = numTeams + increment;
+          if (newValue >= 2 && newValue <= 5) {
+            setNumTeams(newValue);
+          }
+        };
+        
+        // בדיקה האם מספיק שחקנים נבחרו בלי להציג הודעת שגיאה
+        const canGenerateTeams = () => {
+          return selectedPlayers.length === playersCount;
+        };
+        
+        return (
+          <div className="p-4">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">בחירת שחקנים</h2>
+            
+            <div className="card mb-6">
+              <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <h3 className="font-medium text-gray-700">מספר קבוצות ושחקנים</h3>
+              </div>
+              <div className="p-4">
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-800 font-medium">מספר שחקנים במשחק</span>
+                    <div className="flex space-x-2 rtl:space-x-reverse">
+                      <button
+                        onClick={() => setPlayersCount(Math.max(10, playersCount - 1))}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={playersCount <= 10}
+                      >
+                        -
+                      </button>
+                      <span className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                        {playersCount}
+                      </span>
+                      <button
+                        onClick={() => setPlayersCount(Math.min(25, playersCount + 1))}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={playersCount >= 25}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-800 font-medium">מספר קבוצות</span>
+                    <div className="flex space-x-2 rtl:space-x-reverse">
+                      <button
+                        onClick={() => adjustTeamNumber(-1)}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={numTeams <= 2}
+                      >
+                        -
+                      </button>
+                      <span className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                        {numTeams}
+                      </span>
+                      <button
+                        onClick={() => adjustTeamNumber(1)}
+                        className="h-8 w-8 bg-blue-500 text-white rounded-full flex items-center justify-center"
+                        disabled={numTeams >= 5}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-2 text-center text-sm">
+                  <span className="font-medium text-blue-600">{selectedPlayers.length}</span>
+                  <span className="text-gray-600"> מתוך </span>
+                  <span className="font-medium text-blue-600">{playersCount}</span>
+                  <span className="text-gray-600"> שחקנים נבחרו</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="card">
+              <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <h3 className="font-medium text-gray-700">בחר שחקנים למשחק</h3>
+              </div>
+              {players.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <p>אין שחקנים. המנהל צריך להוסיף שחקנים.</p>
+                </div>
+              ) : (
+                <ul>
+                  {players.map(player => (
+                    <li 
+                      key={player.id} 
+                      className="player-row"
+                      onClick={() => togglePlayerSelection(player.id)}
+                    >
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                        <div 
+                          className={`checkbox ${selectedPlayers.includes(player.id) ? 'checked' : ''}`}
+                        >
+                          {selectedPlayers.includes(player.id) && (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-bold text-gray-800">{player.name}</div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
+            <button 
+              onClick={generateTeams}
+              disabled={!canGenerateTeams()}
+              className={`btn-primary mt-6 ${!canGenerateTeams() ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              חלק לקבוצות
+            </button>
+          </div>
+        );
+      };
+      
+      // Team Display Component
+      const TeamDisplay = () => {
+        // צבעי גופיות לקבוצות
+        const [teamColors] = React.useState([
+          {bg: 'bg-blue-500', text: 'text-white', name: 'גופיה כחולה'},
+          {bg: 'bg-yellow-500', text: 'text-gray-800', name: 'גופיה צהובה'},
+          {bg: 'bg-red-500', text: 'text-white', name: 'גופיה אדומה'},
+          {bg: 'bg-orange-500', text: 'text-white', name: 'גופיה כתומה'},
+          {bg: 'bg-purple-500', text: 'text-white', name: 'גופיה סגולה'},
+        ]);
+        
+        const copyTeamsToClipboard = () => {
+          try {
+            const teamsText = generateTeamsText();
+            navigator.clipboard.writeText(teamsText);
+            alert('הקבוצות הועתקו ללוח!');
+          } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('שגיאה בהעתקה.');
+          }
+        };
+
+        const generateTeamsText = () => {
+          return teams.teams.map((teamIds, index) => {
+            const teamName = `קבוצה ${index + 1} - ${teamColors[index % teamColors.length].name}`;
+            const teamPlayers = teamIds.map(id => {
+              const player = players.find(p => p.id === id);
+              return player ? player.name : 'שחקן לא ידוע';
+            }).join(', ');
+            
+            // בדוק אם הקבוצה זכאית לשוער
+            const hasGoalkeeper = teams.teamsWithGoalkeeper && teams.teamsWithGoalkeeper.includes(index);
+            const goalieNote = hasGoalkeeper ? ' + שוער מבחוץ' : '';
+            
+            return `${teamName}${goalieNote}: ${teamPlayers}`;
+          }).join('\n\n');
+        };
+
+        const shareToWhatsApp = () => {
+          try {
+            // יוצר הודעה יפה ומעוצבת עם אמוג'ים
+            let formattedTeamsText = "⚽️ *קבוצות* ⚽️\n\n";
+            
+            // סמלים לקבוצות
+            const teamEmojis = ["🔵", "🟡", "🔴", "🟠", "🟣"];
+            
+            teams.teams.forEach((teamIds, index) => {
+              const teamColor = teamColors[index % teamColors.length].name;
+              const teamEmoji = teamEmojis[index % teamEmojis.length];
+              const stats = getTeamStats(teamIds);
+              
+              // שם הקבוצה
+              formattedTeamsText += `*${teamEmoji} קבוצה ${index + 1} - ${teamColor}*\n`;
+              
+              // שחקנים בקבוצה
+              const teamPlayers = teamIds.map(id => {
+                const player = players.find(p => p.id === id);
+                return player ? player.name : "שחקן לא ידוע";
+              });
+              
+              // הוספת רשימת שחקנים
+              formattedTeamsText += `👥 *שחקנים:* ${teamPlayers.join(", ")}\n`;
+              
+              if (stats) {
+                // הוספת ציון קבוצה
+                formattedTeamsText += `⭐ *ציון קבוצה:* ${stats.strength.toFixed(1)}\n`;
+              }
+              
+              // בדוק אם הקבוצה זכאית לשוער
+              const hasGoalkeeper = teams.teamsWithGoalkeeper && teams.teamsWithGoalkeeper.includes(index);
+              if (hasGoalkeeper) {
+                formattedTeamsText += "🧤 *זכאי לשוער מהממתינים*\n";
+              }
+              
+              formattedTeamsText += "\n";
+            });
+            
+            // פתיחת וואטסאפ עם ההודעה המעוצבת
+            const encodedText = encodeURIComponent(formattedTeamsText);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+          } catch (err) {
+            console.error('Failed to share:', err);
+            // שיתוף טקסטואלי פשוט במקרה של שגיאה
+          const teamsText = encodeURIComponent(generateTeamsText());
+            window.open(`https://wa.me/?text=${teamsText}`, '_blank');
+          }
+        };
+        
+        // פונקציית עזר לקבלת צבע תואם לקבוצה
+        function getColorForTeam(index) {
+          const colors = [
+            '#3182ce', // כחול
+            '#ecc94b', // צהוב
+            '#e53e3e', // אדום
+            '#ed8936', // כתום
+            '#805ad5'  // סגול
+          ];
+          
+          return colors[index % colors.length];
+        }
+        
+        // Calculate team stats for display
+        const getTeamStats = (teamIds) => {
+          if (!teamIds || teamIds.length === 0) return null;
+          
+          const teamPlayers = teamIds.map(id => players.find(p => p.id === id)).filter(Boolean);
+          
+          if (teamPlayers.length === 0) return null;
+          
+          // Calculate strength using the weighted tier approach
+          let weightedSum = 0;
+          let totalWeight = 0;
+          
+          // Define tier weights similar to the algorithm
+          const tierWeights = {
+            tier1: 10,  // 1.0-1.7
+            tier2: 8,   // 1.7-2.6
+            tier3: 6,   // 2.6-3.9
+            tier4: 4,   // 3.9-5.6
+            tier5: 3,   // 5.6-7.0
+            tier6: 2,   // 7.0-7.4
+            tier7: 1.5, // 7.4-9.0
+            tier8: 1    // 9.0-10.0
+          };
+          
+          for (const player of teamPlayers) {
+            const level = parseFloat(player.overallLevel);
+            let tierWeight = 0;
+            
+            if (level >= 1.0 && level <= 1.7) tierWeight = tierWeights.tier1;
+            else if (level <= 2.6) tierWeight = tierWeights.tier2;
+            else if (level <= 3.9) tierWeight = tierWeights.tier3;
+            else if (level <= 5.6) tierWeight = tierWeights.tier4;
+            else if (level <= 7.0) tierWeight = tierWeights.tier5;
+            else if (level <= 7.4) tierWeight = tierWeights.tier6;
+            else if (level <= 9.0) tierWeight = tierWeights.tier7;
+            else tierWeight = tierWeights.tier8;
+            
+            // Higher strength for better players (lower rating)
+            weightedSum += (11 - level) * tierWeight;
+            totalWeight += tierWeight;
+          }
+          
+          const strength = totalWeight > 0 ? weightedSum / totalWeight : 0;
+          
+          // Calculate other team stats
+          const attack = teamPlayers.reduce((sum, p) => sum + parseFloat(p.attackLevel), 0) / teamPlayers.length;
+          const defense = teamPlayers.reduce((sum, p) => sum + parseFloat(p.defenseLevel), 0) / teamPlayers.length;
+          const movement = teamPlayers.reduce((sum, p) => sum + parseFloat(p.movementLevel), 0) / teamPlayers.length;
+          const responsibility = teamPlayers.reduce((sum, p) => sum + parseFloat(p.responsibilityLevel || 5), 0) / teamPlayers.length;
+          
+          // הסרת tierComposition והחזרת רק המדדים הבסיסיים
+          return { strength, attack, defense, movement, responsibility };
+        };
+        
+        // Function to render the progress bar for a given value (1-10 scale)
+        const renderStatBar = (value, max = 10) => {
+          // Convert value to percentage (for 1-10 or 1-5 scales)
+          const percentage = ((value - 1) / (max - 1)) * 100;
+          
+          return (
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full" 
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+          );
+        };
+
+        return (
+          <div className="p-4">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">קבוצות</h2>
+            
+            <div className="mb-4 flex space-x-2 rtl:space-x-reverse">
+              <button 
+                onClick={copyTeamsToClipboard}
+                className="btn-secondary flex-1"
+              >
+                העתק קבוצות
+              </button>
+              <button 
+                onClick={shareToWhatsApp}
+                className="btn-primary flex-1"
+              >
+                שתף בוואטסאפ
+              </button>
+            </div>
+            
+            {teams.teams && teams.teams.map((teamIds, index) => {
+              const stats = getTeamStats(teamIds);
+              if (!stats) return null;
+              
+              // בדוק אם הקבוצה זכאית לשוער
+              const hasGoalkeeper = teams.teamsWithGoalkeeper && teams.teamsWithGoalkeeper.includes(index);
+              
+              return (
+                <div 
+                  key={index}
+                  className={`team-card mb-6 ${teamColors[index % teamColors.length].bg}`}
+                >
+                  <div className={`p-3 flex justify-between items-center ${teamColors[index % teamColors.length].text}`}>
+                    <h3 className="font-bold">קבוצה {index + 1} - {teamColors[index % teamColors.length].name}</h3>
+                    <div className="text-sm">
+                      {teamIds.length} שחקנים
+                      {hasGoalkeeper && <span className="mr-1 font-bold"> + שוער</span>}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4">
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">רמה כללית</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.strength.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.strength, 10)}</div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">התקפה</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.attack.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.attack)}</div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">הגנה</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.defense.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.defense)}</div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div className="text-sm text-gray-500">תנועה</div>
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-blue-600">{stats.movement.toFixed(1)}</div>
+                          <div className="w-24">{renderStatBar(stats.movement)}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <h4 className="font-medium text-gray-700 mb-2">שחקנים:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {teamIds.map(id => {
+                        const player = players.find(p => p.id === id);
+                        if (!player) return null;
+                        
+                        return (
+                          <span key={id} className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                            {player.name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {hasGoalkeeper && (
+                    <div className="bg-green-100 p-2 text-center text-sm font-medium text-green-800 rounded-b-lg border-t border-green-200">
+                      הקבוצה זכאית לבחור שוער מהממתינים
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            
+            <button 
+              onClick={() => setView('selection')}
+              className="btn-secondary mt-2"
+            >
+              חזרה לבחירת שחקנים
+            </button>
+          </div>
+        );
+      };
+      
+      // Admin Login Modal - שינוי גישה מלא למודל הכניסה
+      const AdminLoginModal = () => {
+        // אם המודל לא מוצג, לא מרנדרים שום דבר
+        if (!showLoginModal) return null;
+        
+        // שימוש ב-ref כדי להתמקד אוטומטית בשדה הסיסמה
+        const passwordInputRef = React.useRef(null);
+        
+        // מיקוד אוטומטי בשדה הסיסמה כשהמודל נפתח
+        React.useEffect(() => {
+          if (passwordInputRef.current) {
+            passwordInputRef.current.focus();
+          }
+        }, []);
+        
+        // פונקציה לניסיון כניסה
+        const handleLogin = () => {
+          attemptAdminLogin();
+        };
+        
+        // פונקציה לביטול
+        const handleCancel = () => {
+          setPassword('');
+          setShowLoginModal(false);
+        };
+        
+        // פונקציה לניהול לחיצות מקלדת (לאפשר Enter)
+        const handleKeyDown = (e) => {
+          if (e.key === 'Enter') {
+            handleLogin();
+          } else if (e.key === 'Escape') {
+            handleCancel();
+          }
+        };
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h3 className="text-xl font-bold mb-4 text-center">כניסת מנהל</h3>
+              <div className="mb-4">
+                <label className="block mb-2 font-medium text-gray-700">סיסמה</label>
+                <input
+                  ref={passwordInputRef}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="הכנס סיסמה"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleLogin}
+                  className="btn-primary"
+                >
+                  כניסה
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="btn-secondary"
+                >
+                  ביטול
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <>
+          <button
+            onClick={() => setShowLoginModal(true)}
+            className="admin-btn"
+          >
+            מנהל
+          </button>
+          
+          {isAdmin && (
+            <button
+              onClick={logoutAdmin}
+              className="admin-badge"
+            >
+              יציאה ממצב מנהל
+            </button>
+          )}
+          
+          <header className="header">
+            <h1 className="text-xl font-bold text-white mb-4">מארגן קבוצות</h1>
+            <div className="bg-white bg-opacity-10 rounded-lg p-1 flex">
+              <button
+                onClick={() => setView('players')}
+                className={`nav-btn flex-1 ${view === 'players' ? 'active' : ''}`}
+              >
+                שחקנים
+              </button>
+              <button
+                onClick={() => setView('selection')}
+                className={`nav-btn flex-1 ${view === 'selection' ? 'active' : ''}`}
+              >
+                בחירה
+              </button>
+              <button
+                onClick={() => setView('teams')}
+                className={`nav-btn flex-1 ${view === 'teams' ? 'active' : ''}`}
+                disabled={teams.teams.length === 0}
+              >
+                קבוצות
+              </button>
+            </div>
+          </header>
+
+          <div className="content">
+            {view === 'players' && <PlayerManagement />}
+            {view === 'selection' && <PlayerSelection />}
+            {view === 'teams' && <TeamDisplay />}
+          </div>
+          
+          <AdminLoginModal />
+        </>
+      );
+    };
+
+    // Render the App component
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html> 
