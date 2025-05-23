@@ -197,15 +197,45 @@ const balanceTeams = (playersToAssign, numberOfTeams) => {
       }
       
       candidateTeams.sort((a, b) => {
-        const isPlayerHighValueForCompensation = player.tierIndex === TIER_RANGES[1].index || player.tierIndex === TIER_RANGES[2].index;
-        if (isPlayerHighValueForCompensation) {
-          if (a.hasTier1 !== b.hasTier1) return a.hasTier1 ? 1 : -1; 
+        // Priority 1: Compensation for T2/T3 players if a team lacks T1
+        const isPlayerT2orT3 = player.tierIndex === TIER_RANGES[1].index || player.tierIndex === TIER_RANGES[2].index;
+        if (isPlayerT2orT3) {
+            if (a.hasTier1 !== b.hasTier1) {
+                return a.hasTier1 ? 1 : -1; // Teams WITHOUT T1 get priority for these players
+            }
         }
+
+        // Priority 2: Evenly distribute low-tier players (Tiers 5-8)
+        // This applies if the current player being assigned is from one of these low tiers.
+        const lowTierIndices = [4, 5, 6, 7]; // Indices for Tiers 5, 6, 7, 8
+        if (lowTierIndices.includes(player.tierIndex)) {
+            const countOverallLowTierPlayers = (team) => 
+                lowTierIndices.reduce((sum, tierIdx) => sum + team.tierCounts[tierIdx], 0);
+            
+            const aLowTierCount = countOverallLowTierPlayers(a);
+            const bLowTierCount = countOverallLowTierPlayers(b);
+
+            if (aLowTierCount !== bLowTierCount) {
+                return aLowTierCount - bLowTierCount; // Assign to team with fewer *overall* low-tier (T5-T8) players
+            }
+        }
+
+        // Priority 3: Teams with fewer players from the *current player's specific tier*.
         if (a.tierCounts[player.tierIndex] !== b.tierCounts[player.tierIndex]) {
           return a.tierCounts[player.tierIndex] - b.tierCounts[player.tierIndex];
         }
-        if (a.totalRating !== b.totalRating) return a.totalRating - b.totalRating;
-        if (a.players.length !== b.players.length) return a.players.length - b.players.length;
+        
+        // Priority 4: Balance by total team rating.
+        if (a.totalRating !== b.totalRating) {
+            return a.totalRating - b.totalRating; 
+        }
+        
+        // Priority 5: Balance by number of players.
+        if (a.players.length !== b.players.length) {
+            return a.players.length - b.players.length; 
+        }
+
+        // Priority 6: Random for tie-breaking.
         return Math.random() - 0.5;
       });
 
@@ -453,10 +483,9 @@ Overall Avg Rating Spread: No valid team averages to compare.`);
 // --- Run Test Scenarios ---
 // You can uncomment console.logs inside balanceTeams if you need deep debugging for a specific run.
 
-runTestScenario(3, 13, allMockPlayers);
-runTestScenario(3, 15, allMockPlayers);
-runTestScenario(4, 17, allMockPlayers);
-runTestScenario(4, 20, allMockPlayers);
+runTestScenario(3, 14, allMockPlayers); // Test 5
+runTestScenario(4, 18, allMockPlayers); // Test 6
+runTestScenario(4, 19, allMockPlayers); // Test 7
 
 console.log("\n\nNote: Each run uses a random selection of players from the mock pool.");
 console.log("The 'balanceTeams' function itself also has internal randomization for tie-breaking,");
