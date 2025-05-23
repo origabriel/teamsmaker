@@ -1,0 +1,61 @@
+📊 TIERS GROUND RULES
+
+We group all players into tiers, based on their ranking score (lower = better).
+Even though we work with tiers, always respect the exact rank — e.g. 2.2 is better than 2.6.
+
+🔢 Tier Ranges:
+	•	Tier 1: 1.0 – 1.7
+➤ These are the best players.
+➤ Every team must have exactly one Tier 1 player. No exceptions.
+	•	Tier 2: 2.2 – 2.6
+➤ Slightly below Tier 1.
+➤ Always prefer 2.2 over 2.6 when aiming for stronger combinations.
+	•	Tier 3: 3.0 – 3.9
+➤ Solid mid-level players.
+	•	Tier 4: 4.4 – 5.6
+➤ Slightly weaker mid-tier players.
+	•	Tier 5: 6.2 – 7.0
+➤ Noticeably weaker. Be careful not to stack these.
+	•	Tier 6: 7.2 – 7.4
+➤ Weak. Only one per team at most.
+	•	Tier 7: 8.0 – 9.0
+	•	Tier 8: 9.0 – 10.0
+➤ Very weak players.
+⚠️ Never put two players from Tier 8 in the same team.
+⚠️ Also avoid mixing Tier 7 and Tier 8 in the same team — it creates an unfair disadvantage.
+
+⚖️ Balance Rules (Updated):
+	•	Strict Tier 1 Allocation (if possible):
+Each team should ideally have exactly one Tier 1 player (1.0–1.7).
+⚠️ If there are fewer Tier 1 players than teams, assign them to a subset of the teams, and compensate the others using stronger Tier 2–3 players.
+	•	Tier-Based Compensation Strategy:
+Teams without a Tier 1 must receive better players in other positions (e.g., 2.2, 3.0–3.2).
+In contrast, teams with a Tier 1 should receive slightly weaker mid/low-tier players to maintain fairness.
+	•	Even Tier Spread:
+Distribute Tier 2 (2.2–2.6) players evenly — avoid stacking more than one per team unless necessary.
+Prefer stronger ratings (e.g., 2.2 > 2.6) for weaker teams.
+	•	Tier Diversity Priority:
+Every team should have a healthy tier mix — 1 strong, 1–2 mid, and 1–2 lower-tier players. Avoid clustering strengths or weaknesses.
+	•	Tier 5–6 Limits:
+Only one Tier 6 (7.2–7.4) per team.
+Avoid stacking multiple Tier 5 players. Spread them across teams with Tier 1 presence if possible.
+	•	Avoid Tier 7–8 Conflicts:
+Never assign two Tier 8 (9.0–10.0) players to the same team.
+Avoid mixing Tier 7 and Tier 8 in the same team — it creates major imbalance.
+	•	Fine-Tuning with Exact Ratings:
+Use precise scores within each tier to balance teams.
+Small swaps (e.g., 3.3 ↔ 3.0) can improve parity without major changes.
+	•	Total Team Rating Threshold:
+All teams must stay within an allowed rating range (e.g., ±0.5 from average team rating).
+Rebalance teams outside this threshold.
+	•	Post-Assignment Validation:
+After assigning all players, run validation to check team parity by score and tier mix.
+If needed, make smart swaps to close rating gaps.
+	•	Team Size Rules:
+Each team must have exactly 5 players (or 4 + GK if relevant).
+If players don’t divide evenly, allow 4-player teams with special tier handling.
+	•	Randomization Only After Constraints:
+Introduce random elements only after all tier rules and balancing are respected.
+
+Stick to this structure strictly.
+Fair and even tier distribution is the #1 priority.
